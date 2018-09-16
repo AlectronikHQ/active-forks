@@ -1,5 +1,15 @@
-# active-forks
+Active-Forks
+===========
 
-Sort project forks by stars, watchers, last update, etc.
+Sort project forks by stars, last update, annual commits, etc.
 
-[Website](https://techgaun.github.io/active-forks/index.html)
+![Screenshot](screenshot.png)
+
+# Quick Start
+
+Currently, this tool isn't hosted online but can be run locally. Clone the repository, then open the index.html file in Chrome.
+
+```
+git clone https://github.com/KyleKing/active-forks.git
+open active-forks/index.html
+```
