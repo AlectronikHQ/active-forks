@@ -17,7 +17,7 @@ function showMsg( msg, type ) {
 }
 
 function updateDT( data ) {
-  // Remove any alerts, if any:
+  // Remove any alerts
   if ( $( '.alert' ) )
     $( '.alert' ).remove()
 
@@ -29,7 +29,7 @@ function updateDT( data ) {
     forks.push( fork )
   }
   const dataSet = forks.map( fork => window.columnNamesMap.map( colNM => fork[colNM[1]] ) )
-  window.forkTable.clear().rows.add( dataSet ).draw()
+  window.forkTable.rows.add( dataSet ).draw()
 }
 
 function initDT() {
@@ -37,14 +37,14 @@ function initDT() {
   window.columnNamesMap = [
     // [ 'Repository', 'full_name' ],
     ['Link', 'repoLink'],  // custom key
-    [ 'Owner', 'ownerName' ],  // custom key
-    [ 'Name', 'name' ],
-    [ 'Branch', 'default_branch' ],
-    [ 'Stars', 'stargazers_count' ],
-    [ 'Watchers', 'watchers' ],
-    [ 'Forks', 'forks' ],
-    [ 'Size', 'size' ],
-    [ 'Last Push', 'pushed_at' ],
+    ['Owner', 'ownerName'],  // custom key
+    ['Name', 'name'],
+    ['Branch', 'default_branch'],
+    ['Stars', 'stargazers_count'],
+    ['Watchers', 'watchers'],
+    ['Size', 'size'],
+    ['Commits this Year', 'commitsCount'],
+    ['Last Push', 'pushed_at'],
   ]
 
   // Sort by stars:
@@ -135,15 +135,43 @@ function initDT() {
 //   document.getElementById( 'footer' ).innerHTML = `${data.length} ${data.length === 1 ? 'result' : 'results'}`
 // }
 
+function countCommits( fork ) {
+  fetch( `https://api.github.com/repos/${fork.full_name}/stats/commit_activity` )
+    .then( ( response ) => response.json() )
+    .then( ( stats ) => {
+      fork.stats = stats
+      fork.commitsCount = stats.reduce( ( week, accum ) => {
+        return {total: accum.total + week.total}
+      } ).total
+      updateDT( [fork] )
+    } )
+}
+
 function fetchAndShow( repo ) {
   // document.getElementById( 'find' ).disabled = true
   // document.getElementById( 'spinner' ).removeAttribute( 'hidden' )
+
+  // Clear DataTable
+  window.forkTable.clear().draw()
 
   fetch( `https://api.github.com/repos/${repo}/forks?sort=stargazers` )
     .then( ( response ) => response.json() )
     .then( ( data ) => {
       // New Method creates Interactive DataTable
-      updateDT( data )
+      var loggedIn = false
+      if ( loggedIn ) {
+        for ( let fork of data )
+          countCommits( fork )
+      } else {
+        // If not logged in, minimize number of API requests
+        data.map( ( fork ) => {
+          fork.stats = []
+          fork.commitsCount = 'NA'
+          return fork
+        } )
+        updateDT( data )
+      }
+
       // // Previous Method Create Static HTML Table:
       // showData( data )
       // document.getElementById( 'find' ).disabled = false
