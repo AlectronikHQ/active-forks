@@ -21,4 +21,5 @@ open active-forks/index.html
 ## Feature Requests
 
 - Format the date in moment
+- Fix error when fetching commit stats where returned JSON is empty
 - Freeze information of upstream repository (commits, stars, etc.)
