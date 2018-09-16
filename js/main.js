@@ -136,8 +136,10 @@ function initDT() {
 //   document.getElementById( 'footer' ).innerHTML = `${data.length} ${data.length === 1 ? 'result' : 'results'}`
 // }
 
-function countCommits( fork ) {
-  fetch( `https://api.github.com/repos/${fork.full_name}/stats/commit_activity` )
+function countCommits( headers, fork ) {
+  fetch( `https://api.github.com/repos/${fork.full_name}/stats/commit_activity`, {
+    headers: headers,
+  } )
     .then( ( response ) => response.json() )
     .then( ( stats ) => {
       fork.stats = stats
@@ -155,14 +157,25 @@ function fetchAndShow( repo ) {
   // Clear DataTable
   window.forkTable.clear().draw()
 
-  fetch( `https://api.github.com/repos/${repo}/forks?sort=stargazers` )
-    .then( ( response ) => response.json() )
+  // Get token and create headers
+  var token = document.getElementById( 'token' ).value
+  var headers = new Headers()
+  if ( token.length > 10 )
+    headers.append( 'Authorization', `token ${token}` )
+
+  fetch( `https://api.github.com/repos/${repo}/forks?sort=stargazers`, {
+    headers: headers,
+  } )
+    .then( ( response ) => {
+      if ( !response.ok )
+        throw Error( response.statusText )
+      return response.json()
+    } )
     .then( ( data ) => {
-      // New Method creates Interactive DataTable
-      var loggedIn = false
-      if ( loggedIn ) {
+      // Creates Interactive DataTable
+      if ( token.length > 10  ) {
         for ( let fork of data )
-          countCommits( fork )
+          countCommits( headers, fork )
       } else {
         // If not logged in, minimize number of API requests
         data.map( ( fork ) => {
@@ -177,6 +190,11 @@ function fetchAndShow( repo ) {
       // showData( data )
       // document.getElementById( 'find' ).disabled = false
       // document.getElementById( 'spinner' ).setAttribute( 'hidden', 'hidden' )
+    } )
+    .catch( ( error ) => {
+      const msg = error.toString().indexOf( 'Forbidden' ) >= 0 ? 'Error: API Rate Limit Exceeded' : error
+      showMsg( `${msg}. Additional info in console`, 'danger' )
+      console.error( error )
     } )
 }
 
@@ -212,7 +230,8 @@ function getQueryParams() {
 }
 
 window.addEventListener( 'load', () => {
-  initDT()  // Initialize the DatatTable and window.columnNames variables
+  // Initialize the DatatTable and window.columnNames variables
+  initDT()
 
   // Get repository name from URL `http://.../?q=<repo>`
   const repo = getQueryParams().q
@@ -221,4 +240,3 @@ window.addEventListener( 'load', () => {
     fetchData()
   }
 } )
-

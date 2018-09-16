@@ -40,6 +40,7 @@
                             <form id="form" role="form">
                                 <div class="input-group">
                                     <input id="q" name="q" class="form-control" type="text" placeholder="techgaun/github-dorks">
+                                    <input id="token" name="token" class="form-control" type="text" placeholder="Personal Access Token">
                                     <span class="input-group-btn">
                                         <button id="find" onClick="fetchData()" type="button" class="btn btn-primary">
                                         <i id="spinner" class="fa fa-spinner fa-pulse fa-fw" hidden></i> Find
@@ -47,7 +48,14 @@
                                     </span>
                                 </div>
                             </form>
+                            <br>
+                            <p align="center">
+                                To see the number of commits/fork, enter a Personal Access Token from Github
+                                <br>
+                                See <a href="https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/">Github's official guide</a> (note that no scopes/permissions are necessary and can all be left unchecked)
+                            </p>
                         </div>
+                        <hr>
                     <div id="data-body"></div>
                     <table id="forkTable" class="display" width="100%"></table>
                 </div>
