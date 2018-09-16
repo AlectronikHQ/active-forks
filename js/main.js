@@ -42,6 +42,7 @@ function initDT() {
     ['Branch', 'default_branch'],
     ['Stars', 'stargazers_count'],
     ['Watchers', 'watchers'],
+    ['Forks', 'forks'],
     ['Size', 'size'],
     ['Commits this Year', 'commitsCount'],
     ['Last Push', 'pushed_at'],
