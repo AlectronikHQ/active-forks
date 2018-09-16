@@ -139,13 +139,28 @@ function countCommits( headers, fork ) {
   fetch( `https://api.github.com/repos/${fork.full_name}/stats/commit_activity`, {
     headers: headers,
   } )
-    .then( ( response ) => response.json() )
+    .then( ( response ) =>  {
+      if ( !response.ok )
+        throw Error( response.statusText )
+      return response.json()
+    } )
     .then( ( stats ) => {
       fork.stats = stats
-      fork.commitsCount = stats.reduce( ( week, accum ) => {
-        return {total: accum.total + week.total}
-      } ).total
+      if ( stats.length > 0 ) {
+        fork.commitsCount = stats.reduce( ( week, accum ) => {
+          return {total: accum.total + week.total}
+        } ).total
+      } else {
+        fork.commitsCount = 'Err'
+        console.log( `Failed to parse stats for fork with:
+  https://api.github.com/repos/${fork.full_name}/stats/commit_activity` )
+        console.log( fork )
+      }
       updateDT( [fork] )
+    } )
+    .catch( ( error ) => {
+      showMsg( `${error}. Additional info in console`, 'danger' )
+      console.error( error )
     } )
 }
 
